@@ -1,0 +1,16 @@
+node_modules
+*.iml
+client/bower_components
+client/public/js/bundle.**
+client/public/js/vendors.**
+
+npm-debug.log
+
+# Sublime Text
+#
+*.sublime-project
+*.sublime-workspace
+
+# Misc
+yarn.lock
+.vscode
