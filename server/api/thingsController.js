@@ -10,7 +10,7 @@ import {ValidationError, getResponseError} from '../errors'
 /**
  * things controller.
  */
-export default {
+const thingsController = {
 
   /**
    * Load all things
@@ -21,18 +21,16 @@ export default {
    * @param {Function} [next]
    * @returns {*}
    */
-  async getAll(req, res, next) {
+  getAll(req, res, next) {
     logger.info('api/thingsController|getAll')
 
-    try {
-      const things = await thingLogic.getAll()
+    thingLogic.getAll()
+      .then(things => res.json({things: things}))
+      .catch(err => {
+        logger.error('api/thingsController|getAll', err)
 
-      return res.json({things: things})
-    } catch (e) {
-      logger.error('api/thingsController|getAll', e)
-
-      return next(e)
-    }
+        return next(err)
+      })
   },
 
   /**
@@ -44,18 +42,37 @@ export default {
    * @param {Function} [next]
    * @returns {*}
    */
-  async getById(req, res, next) {
+  getById(req, res, next) {
     logger.info('api/thingsController|getById')
 
-    try {
-      const thing = await thingLogic.getById(req.params.id)
+    return thingLogic.getById(req.params.id)
+        .then(thing => res.json({thing: thing}))
+        .catch(err => {
+          logger.error('api/thingsController|getById', err)
 
-      return res.json({thing: thing})
-    } catch (e) {
-      logger.error('api/thingsController|getById', e)
+          return next(err)
+        })
+  },
 
-      return next(e)
-    }
+    /**
+   * Load users thing by hash
+   *
+   * @param {object} req
+   * @param {object} res
+   * @param {function} res.json
+   * @param {Function} [next]
+   * @returns {*}
+   */
+  getByHash(req, res, next) {
+    logger.info('api/thingsController|getByHash')
+
+    return thingLogic.getByHash(req.params.hash)
+      .then(thing => res.json({thing: thing}))
+      .catch(err => {
+          logger.error('api/thingsController|getByHash', err)
+
+          return next(err)
+      })
   },
 
   /**
@@ -67,25 +84,44 @@ export default {
    * @param {Function} [next]
    * @returns {*}
    */
-  async add(req, res, next) {
+  add(req, res, next) {
     logger.info('api/thingsController|add')
 
-    try {
-      const errors = validate(req.body, validationRules)
-      if (errors) {
-        const responseError = getResponseError(new ValidationError('Bad request', errors))
+    const errors = validate(req.body, validationRules)
+    if (errors) {
+      const responseError = getResponseError(new ValidationError('Bad request', errors))
 
-        return res.status(responseError.error.code).json(responseError)
-      }
-
-      const thing = await thingLogic.add(req.body)
-
-      return res.json({thing})
-    } catch (e) {
-      logger.error('api/thingsController|add', e)
-
-      return next(e)
+      return res.status(responseError.error.code).json(responseError)
     }
+
+    return thingLogic.add(req.body)
+      .then(thing => res.json({thing}))
+      .catch(err => {
+        logger.error('api/thingsController|add', err)
+
+        return next(err)
+      })
+  },
+
+  /**
+   * Delete thing
+   *
+   * @param {object} req
+   * @param {object} res
+   * @param {function} res.json
+   * @param {Function} [next]
+   * @returns {*}
+   */
+  delete(req, res, next) {
+    logger.info('api/thingsController|delete')
+
+    return thingLogic.delete(req.params.id)
+      .then(affectedRows => res.json({affectedRows: affectedRows}))
+      .catch(err => {
+        logger.error('api/thingsController|delete', err)
+
+        return next(err)
+      })
   },
 
   /**
@@ -97,24 +133,53 @@ export default {
    * @param {Function} [next]
    * @returns {*}
    */
-  async update(req, res, next) {
+  update(req, res, next) {
     logger.info('api/thingsController|update')
 
-    try {
-      const errors = validate(req.body, validationRules)
-      if (errors) {
-        const responseError = getResponseError(new ValidationError('Bad request', errors))
-
-        return res.status(responseError.error.code).json(responseError)
-      }
-
-      const thing = await thingLogic.update(req.params.id, req.body)
-
-      return res.json({thing})
-    } catch (e) {
-      logger.error('api/thingsController|update', e)
-
-      return next(e)
+    const updateRequest = req.body
+    if (updateRequest && !updateRequest.status && updateRequest.visible !== 'undefined') {
+        return thingsController.updateVisible(req, res, next)
     }
+
+    const errors = validate(req.body, validationRules)
+    if (errors) {
+      const responseError = getResponseError(new ValidationError('Bad request', errors))
+
+      return res.status(responseError.error.code).json(responseError)
+    }
+
+    return thingLogic.update(req.params.id, req.body)
+      .then(thing => res.json({thing}))
+      .catch(err => {
+        logger.error('api/thingsController|update', err)
+
+        return next(err)
+      })
+  },
+
+  /**
+  * Update thing visible
+  *
+  * @param {object} req
+  * @param {object} res
+  * @param {function} res.json
+  * @param {Function} [next]
+  * @returns {*}
+  */
+  updateVisible(req, res, next) {
+    logger.info('api/thingsController|update')
+
+    return thingLogic.setIsVisible(req.params.id, req.body.visible)
+      .then(() => res.json({
+          id: req.params.id,
+          isEnabled: req.body.visible
+        })
+      )
+      .catch(err => {
+        logger.log('error', 'thingsController|updateVisible|error:%o', err)
+
+        return next(err)
+      })
   }
 }
+export default thingsController

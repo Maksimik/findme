@@ -24,9 +24,9 @@ function decide(nextState, replace) {
   }
 }
 
-async function signOut() {
-  await authController.signOut()
-  browserHistory.push('/')
+function signOut() {
+  authController.signOut()
+    .then(() => browserHistory.push('/'))
 }
 
 function onGuestEnter(nextState, replace) {
@@ -57,7 +57,7 @@ const App = <Route>
     <Route path="/signUp" component={SignUp} onEnter={onGuestEnter} />
 
     <Route path="/signOut" onEnter={signOut} />
-    <Route path="thing/:id" component={Thing} />
+    <Route path="/thing/:hash" component={Thing} />
 </Route>
 
 export default App

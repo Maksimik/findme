@@ -12,16 +12,15 @@ export default {
    * Gets all things.
    * @return {Promise}
    */
-  getAll: async () => {
+  getAll: () => {
     const sql = `
       SELECT
         id, hash, title, description, visible, status
       FROM things
       ORDER BY title ASC`
 
-    const dbData = await dbBase.findAll(sql)
-
-    return dbData.map(x => new Thing(x))
+    return dbBase.findAll(sql)
+      .then(dbData => dbData.map(x => new Thing(x)))
   },
 
   /**
@@ -29,7 +28,7 @@ export default {
    * @param {int} id
    * @return {Promise}
    */
-  getById: async id => {
+  getById: id => {
     const sql = `
       SELECT
         id, hash, title, description, visible, status
@@ -37,9 +36,35 @@ export default {
       WHERE id = :id`
 
     const criteria = {id}
-    const dbData = await dbBase.findOne(sql, criteria, null)
 
-    return dbData === null ? null : new Thing(dbData)
+    return dbBase.findOne(sql, criteria, null)
+      .then(dbData => {
+        if (dbData === null) return null
+
+          return new Thing(dbData)
+      })
+  },
+
+   /**
+   * Gets a thing by hash.
+   * @param {string} hash
+   * @return {Promise}
+   */
+  getByHash: hash => {
+    const sql = `
+      SELECT
+        id, hash, title, description, visible, status
+      FROM things
+      WHERE hash = :hash`
+
+    const criteria = {hash}
+
+    return dbBase.findOne(sql, criteria, null)
+    .then(dbData => {
+        if (typeof dbData === 'undefined' || dbData === null) return null
+
+          return new Thing(dbData)
+    })
   },
 
   /**
@@ -47,7 +72,7 @@ export default {
    * @param {Object} thing
    * @return {Promise}
    */
-  insert: async thing => {
+  insert: thing => {
     const sql = `
       INSERT INTO things
         (hash, title, description, visible, status, created_at)
@@ -62,7 +87,7 @@ export default {
       visible: thing.visible
     }
 
-    return await dbBase.insert(sql, criteria)
+    return dbBase.insert(sql, criteria)
   },
 
   /**
@@ -71,7 +96,7 @@ export default {
    * @param {Object} thing
    * @return {Promise}
    */
-  update: async (id, thing) => {
+  update: (id, thing) => {
     const sql = `
       UPDATE things
       SET
@@ -79,7 +104,7 @@ export default {
         description = :description,
         status = :status,
         visible = :visible,
-        update_at = :NOW()
+        updated_at = NOW()
       WHERE id = :id`
 
     const criteria = {
@@ -90,6 +115,41 @@ export default {
       visible: thing.visible
     }
 
-    return await dbBase.update(sql, criteria)
+    return dbBase.update(sql, criteria)
+  },
+
+  /**
+   * Delete thing.
+   * @param {int} id
+   * @return {Promise}
+   */
+  delete: id => {
+    const sql = `
+      DELETE FROM
+        things
+      WHERE id = :id`
+
+    const criteria = {id}
+
+    return dbBase.delete(sql, criteria)
+  },
+
+  /**
+   * Update thing visible.
+   * @param {int} id
+   * @param {bool} isVisible
+   * @return {Promise}
+   */
+  updateIsVisibled: (id, isVisible) => {
+    const sql = `
+      UPDATE
+        things
+      SET
+        visible = :isVisible
+      WHERE id = :id`
+
+    const criteria = {id, isVisible: Boolean(isVisible)}
+
+    return dbBase.update(sql, criteria)
   }
 }

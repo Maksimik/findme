@@ -23,26 +23,30 @@ class ThingEdit extends React.Component {
     this.getThing()
   }
 
-  async getThing() {
-    try {
-      this.setState({loading: true})
-      const thingId = parseInt(this.props.params.id, 10)
-      const response = await thingService.getById(thingId)
-      const thingResponse = response.thing
+  getThing() {
 
-      const thing = {
-        id: thingResponse.id,
-        title: thingResponse.title,
-        description: thingResponse.description,
-        status: thingResponse.status,
-        visible: thingResponse.visible
-      }
+    this.setState({loading: true})
 
-      this.setState({thing, loading: false})
-    } catch (error) {
-      this.setState({loading: false})
-      Log.error(`ThingEdit|getThing|error:${error}`)
-    }
+    const thingId = parseInt(this.props.params.id, 10)
+
+    thingService.getById(thingId)
+      .then(response => {
+        const thingResponse = response.thing
+
+        const thing = {
+          id: thingResponse.id,
+          title: thingResponse.title,
+          description: thingResponse.description,
+          status: thingResponse.status,
+          visible: thingResponse.visible
+        }
+
+        this.setState({thing, loading: false})
+      })
+      .catch(err => {
+        this.setState({loading: false})
+        Log.error(`ThingEdit|getThing|error:${err}`)
+        })
   }
 
   onSave() {

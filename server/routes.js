@@ -5,6 +5,7 @@ import config from './config/environment'
 import logger from './core/logger'
 import api from './api'
 import authController from './api/authController'
+import thingsController from './api/thingsController'
 
 /**
  * Defines routes.
@@ -19,6 +20,7 @@ export default (app, auth) => {
 
   app.use('/api/signIn', authController.signIn)
   app.use('/api/signUp', authController.signUp)
+  app.use('/api/preview/:hash', thingsController.getByHash)
 
   app.use('/api', auth.authenticate, api)
 

@@ -1,6 +1,7 @@
 'use strict'
 
 import {thingDb, userThingsDb} from '../db'
+import uuid from 'uuid-v4'
 
 const thingLogic = {
 
@@ -8,12 +9,9 @@ const thingLogic = {
    * Gets all things
    * @returns {Array}
    */
-  async getAll() {
-    let things = []
+  getAll() {
 
-    things = await thingDb.getAll()
-
-    return things
+    return thingDb.getAll()
   },
 
   /**
@@ -21,10 +19,24 @@ const thingLogic = {
    * @param {int} id
    * @returns {Array}
    */
-  async getById(id) {
-    const thing = await thingDb.getById(id)
+  getById(id) {
 
-    return thing
+    return thingDb.getById(id)
+  },
+
+  /**
+   * Gets users thing by hash
+   * @param {string} hash
+   * @returns {Array}
+   */
+  getByHash(hash) {
+
+    return thingDb.getByHash(hash)
+      .then(thing => {
+        if (thing.visible === 0) return null
+
+        return thing
+      })
   },
 
   /**
@@ -32,14 +44,21 @@ const thingLogic = {
    * @param {Object} params
    * @returns {Array}
    */
-  async add(params) {
+  add(params) {
 
     const data = this.getPreparedToSave(params)
-    data.hash = 'hash'
-    const thingId = await thingDb.insert(data)
-    await userThingsDb.insert(params.userId, thingId)
 
-    return {id: thingId}
+    return this.getHash()
+      .then(hash => {
+
+        data.hash = hash
+
+        return thingDb.insert(data)
+          .then(thingId =>
+             userThingsDb.insert(params.userId, thingId)
+              .then(() => ({id: thingId}))
+            )
+      })
   },
 
   /**
@@ -48,21 +67,54 @@ const thingLogic = {
    * @param {Object} params
    * @returns {Array}
    */
-  async update(thingId, params) {
+  update(thingId, params) {
 
     const data = this.getPreparedToSave(params)
-    await thingDb.update(thingId, data)
 
-    return {id: thingId}
+    return thingDb.update(thingId, data)
+  },
+
+  /**
+   * Delete thing
+   * @param {number} thingId
+   * @returns {Array}
+   */
+  delete(thingId) {
+
+    return thingDb.delete(thingId)
+  },
+
+  /**
+   * update thing visible
+   * @param {number} id
+   * @param {boolean} isVisible
+   * @returns {Array}
+   */
+  setIsVisible(id, isVisible) {
+
+    return thingDb.updateIsVisibled(id, isVisible)
   },
 
   getPreparedToSave(thing) {
+
     return {
       title: thing.title,
       status: thing.status,
       description: thing.description,
       visible: thing.visible
     }
+  },
+
+  getHash() {
+    const hash = uuid()
+
+    return thingDb.getByHash(hash)
+      .then(thing => {
+
+        if (thing) this.getHash()
+
+        return hash
+      })
   }
 }
 

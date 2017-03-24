@@ -16,12 +16,11 @@ export default {
    * @return {{token: *, user: *}}
    * @throws {SignInError}
    */
-  async signIn(login, password) {
+  signIn(login, password) {
     if (this.invalidLoginRequest(login, password)) throw new SignInError('Invalid parameters', {login})
 
-    const user = await userDb.getByLogin(login)
-
-    return this.getLoginResponse(user, login, password)
+    return userDb.getByLogin(login)
+      .then(user => this.getLoginResponse(user, login, password))
   },
 
 
@@ -31,29 +30,33 @@ export default {
    * @returns {Array}
    * @throws {LoginError}
    */
-  async signUp(params) {
+  signUp(params) {
 
-    const user = await userDb.getByLogin(params.login)
+    return userDb.getByLogin(params.login)
+      .then(user => {
+        if (user) return {error: 'A user with this login already exists'}
 
-    if (user) return {error: 'A user with this login already exists'}
+        const data = this.getPreparedToSave(params)
+        const hashMethod = config.auth.hashMethod
+        const hashSecret = config.auth.hashSecret
 
-    const data = this.getPreparedToSave(params)
-    const hashMethod = config.auth.hashMethod
-    const hashSecret = config.auth.hashSecret
+        const passwordHash = crypto.createHmac(hashMethod, hashSecret)
+          .update(data.password)
+          .digest('hex')
 
-    const passwordHash = crypto.createHmac(hashMethod, hashSecret)
-      .update(data.password)
-      .digest('hex')
+        data.password = passwordHash
 
-    data.password = passwordHash
-    const userId = await userDb.insert(data)
-    data.id = userId
-    await userRolesDb.insert(userId, 2)
+        return userDb.insert(data)
+          .then(userId => {
+            data.id = userId
+            userRolesDb.insert(userId, 2)
+              .then(id => ({
+                token: this.generateToken(id),
+                user: (new User(data)).commonDetails
+              }))
+          })
 
-    return {
-      token: this.generateToken(data.id),
-      user: (new User(data)).commonDetails
-    }
+      })
   },
 
   getPreparedToSave(user) {

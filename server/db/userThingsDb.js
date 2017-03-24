@@ -13,7 +13,7 @@ export default {
    * @param {int} thingId
    * @return {Promise}
    */
-  insert: async (userId, thingId) => {
+  insert: (userId, thingId) => {
     const sql = `
       INSERT INTO user_things
         (thing_id, user_id)
@@ -25,6 +25,6 @@ export default {
       thingId: thingId
     }
 
-    return await dbBase.insert(sql, criteria)
+    return dbBase.insert(sql, criteria)
   }
 }

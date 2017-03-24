@@ -13,7 +13,7 @@ export default {
    * @param {string} login
    * @return {Promise}
    */
-  getByLogin: async login => {
+  getByLogin: login => {
 
     const sql = `
       SELECT
@@ -22,9 +22,13 @@ export default {
       WHERE login = :login`
 
     const criteria = {login}
-    const dbData = await dbBase.findOne(sql, criteria, null)
 
-    return dbData === null ? null : new User(dbData)
+    return dbBase.findOne(sql, criteria, null)
+      .then(dbData => {
+          if (dbData === null) return null
+
+            return new User(dbData)
+      })
   },
 
     /**
@@ -32,16 +36,20 @@ export default {
    * @param {int} id
    * @returns {null | User}
    */
-  getById: async id => {
+  getById: id => {
     const sql = `
       SELECT
         id, first_name, last_name, login, password
       FROM users
       WHERE id = :id`
     const criteria = {id}
-    const dbData = await dbBase.findOne(sql, criteria, null)
 
-    return dbData === null ? null : new User(dbData)
+    return dbBase.findOne(sql, criteria, null)
+      .then(dbData => {
+          if (dbData === null) return null
+
+            return new User(dbData)
+      })
   },
 
   /**

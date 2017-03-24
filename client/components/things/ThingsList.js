@@ -7,6 +7,8 @@ import Button from '../core/Button'
 import LinkButton from '../core/LinkButton'
 import Loader from '../core/Loader'
 import LoaderModal from '../core/LoaderModal'
+import CheckboxAction from '../core/CheckboxAction'
+import _ from 'lodash'
 
 class ThingsList extends React.Component {
   constructor(props) {
@@ -15,24 +17,26 @@ class ThingsList extends React.Component {
     this.state = {
       things: [],
       loading: true,
-      loadingModal: false
+      loadingModal: false,
+      visibleRowsProcessing: []
     }
+    this.activeFormatter = this.activeFormatter.bind(this)
   }
 
   componentDidMount() {
     this.getThings()
   }
 
-  async getThings() {
-    try {
-      this.setState({loading: true})
-      const response = await thingService.getAll()
-      const things = response.things
-      this.setState({things, loading: false})
-    } catch (err) {
-      this.setState({loading: false})
-      Log.error(`ThingsList|getThings|error:${err}`)
-    }
+  getThings() {
+    this.setState({loading: true})
+    thingService.getAll()
+      .then(response => {
+        this.setState({things: response.things, loading: false})
+      })
+      .catch(err => {
+        this.setState({loading: false})
+        Log.error(`ThingsList|getThings|error:${err}`)
+      })
   }
 
   actionFormatter(value, row) {
@@ -42,8 +46,74 @@ class ThingsList extends React.Component {
           title="Delete"
           bsStyle="danger"
           bsSize="xsmall"
+          onClick={this.deleteThing.bind(this, row.id)}
         />
       </div>
+  }
+
+  activeFormatter(value, row) {
+    const loading = this.state.visibleRowsProcessing.indexOf(row.id) !== -1
+
+    return <CheckboxAction
+      loading={loading}
+      value={Boolean(value)}
+      onChange={this.onVisibleChange.bind(this, row)}
+    />
+  }
+
+  addToVisibleProcessing(id) {
+    if (this.state.visibleRowsProcessing.indexOf(id) !== -1) return
+
+    const visibleRowsProcessing = this.state.visibleRowsProcessing
+
+    this.state.visibleRowsProcessing.push(id)
+    this.setState({visibleRowsProcessing})
+  }
+
+  removeFromVisibleProcessing(id) {
+    const visibleRowsProcessing = this.state.visibleRowsProcessing
+    const index = visibleRowsProcessing.indexOf(id)
+
+    if (index === -1) return
+
+    visibleRowsProcessing.splice(index, 1)
+    this.setState({visibleRowsProcessing})
+  }
+
+  onVisibleChange(row) {
+
+    this.addToVisibleProcessing(row.id)
+    const newIsVisible = !row.visible
+    thingService.update(row.id, {visible: Number(newIsVisible)})
+      .then(() => {
+        const index = _.findIndex(this.state.things, {id: row.id})
+        row.visible = newIsVisible
+        const things = this.state.things
+        things.splice(index, 1, row)
+
+        setTimeout(this.removeFromVisibleProcessing.bind(this, row.id), 350)
+        this.setState({things})
+      })
+      .catch(err => {
+        this.removeFromVisibleProcessing(row.id)
+        Log.error(`ThingsList|onVisibleChange|error:${err}`)
+      })
+  }
+
+  deleteThing(id) {
+    this.setState({loadingModal: true})
+      thingService.delete(id)
+        .then(() => {
+          const things = this.state.things
+          const index = _.findIndex(things, {id: id})
+          things.splice(index, 1)
+
+          this.setState({things, loadingModal: false})
+        })
+        .catch(err => {
+          Log.error(`ThingsList|deleteThing|error:${err}`)
+          this.setState({loadingModal: false})
+        })
   }
 
   render() {
@@ -61,6 +131,9 @@ class ThingsList extends React.Component {
         </TableHeaderColumn>
         <TableHeaderColumn dataField="status" width="70px" >
           Status
+        </TableHeaderColumn>
+        <TableHeaderColumn dataField="visible" dataFormat={this.activeFormatter} dataAlign="center" width="75px">
+          Visible
         </TableHeaderColumn>
         <TableHeaderColumn dataFormat={this.actionFormatter.bind(this)} dataAlign="center" width="100px">
           Actions

@@ -30,88 +30,116 @@ class Db {
     }
   }
 
-  async findAll(sql, criteria, defaultResult) {
-    let conn = null
-    try {
-      conn = await this.pool.getConnection()
-      const [rows] = await conn.execute(sql, criteria)
 
-      return rows
-    } catch (err) {
-      logger.error('db|findAll', {err, sql, criteria})
+  findAll(sql, criterial, defaultResult) {
+    let connection = null
 
-      return defaultResult
-    } finally {
-      this.closeConnection(conn)
-    }
+    return this.pool.getConnection()
+      .then(conn => {
+        connection = conn
+        const data = conn.execute(sql, criterial)
+        this.closeConnection(conn)
+
+        return data
+      })
+      .then(data => data[0])
+      .catch(err => {
+        logger.error('db|findAll', {err, sql, criterial})
+        this.closeConnection(connection)
+
+        return defaultResult
+      })
   }
 
-  async findOne(sql, criteria, defaultResult) {
-    let conn = null
-    try {
-      conn = await this.pool.getConnection()
-      const [rows] = await conn.execute(sql, criteria)
+  findOne(sql, criterial, defaultResult) {
+    let connection = null
 
-      return rows.length > 0 ? rows[0] : defaultResult
-    } catch (err) {
-      logger.log('error', 'db|findOne', {sql, criteria, err})
+    return this.pool.getConnection()
+      .then(conn => {
+        connection = conn
 
-      return defaultResult
-    } finally {
-      this.closeConnection(conn)
-    }
+        const rows = conn.execute(sql, criterial)
+
+        this.closeConnection(conn)
+
+        return rows
+      })
+      // .then(rows => rows.length > 0 ? rows[0][0] : defaultResult)
+      .then(rows => {
+        if (rows.length > 0) return rows[0][0]
+
+          return defaultResult
+      })
+      .catch(err => {
+        logger.log('error', 'db|findOne', {sql, criterial, err})
+        this.closeConnection(connection)
+
+        return defaultResult
+      })
   }
 
   /**
    * Executes UPDATE query.
    * @param {string} sql
-   * @param {Object} criteria
+   * @param {Object} criterial
    * @returns {int} - number of updated records.
    */
-  async update(sql, criteria) {
-    let conn = null
-    try {
-      conn = await this.pool.getConnection()
-      const result = await conn.query(sql, criteria)
+   update(sql, criterial) {
+    let connection = null
 
-      return result[0].affectedRows
-    } catch (err) {
-      logger.log('error', 'db|update', {sql, criteria, err})
-      throw err
-    } finally {
-      this.closeConnection(conn)
-    }
+    return this.pool.getConnection()
+      .then(conn => {
+        connection = conn
+        const result = conn.query(sql, criterial)
+
+        this.closeConnection(conn)
+
+        return result
+      })
+      .then(result => result[0].affectedRows)
+      .catch(err => {
+        logger.log('error', 'db|update', {sql, criterial, err})
+        this.closeConnection(connection)
+        throw err
+      })
   }
 
-  async insert(sql, criteria) {
-    let conn = null
-    try {
-      conn = await this.pool.getConnection()
-      const result = await conn.query(sql, criteria)
+  insert(sql, criterial) {
+    let connection = null
 
-      return result[0].insertId
-    } catch (err) {
-      logger.log('error', 'db|insert', {sql, criteria, err})
-      throw err
-    } finally {
-      this.closeConnection(conn)
-    }
+    return this.pool.getConnection()
+      .then(conn => {
+        connection = conn
+
+        return conn.query(sql, criterial)
+      })
+      .then(result => {
+        this.closeConnection(connection)
+
+        return result[0].insertId
+      })
+      .catch(err => {
+        logger.log('error', 'db|insert', {sql, criterial, err})
+        this.closeConnection(connection)
+        throw err
+      })
   }
 
-  async delete(sql, criteria) {
-    let conn = null
-    try {
-      conn = await this.pool.getConnection()
-      const result = await conn.query(sql, criteria)
+  delete(sql, criterial) {
+    let connection = null
 
-      return result[0].affectedRows
-    } catch (err) {
-      logger.log('error', 'db|delete', {sql, criteria, err})
+     return this.pool.getConnection()
+      .then(conn => {
+        connection = conn
 
-      throw err
-    } finally {
-      this.closeConnection(conn)
-    }
+        return conn.execute(sql, criterial)
+      })
+      .then(result => result[0].affectedRows)
+      .catch(err => {
+        logger.log('error', 'db|delete', {sql, criterial, err})
+        this.closeConnection(connection)
+        throw err
+      })
   }
 }
 

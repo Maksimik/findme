@@ -67,18 +67,15 @@ class SignUpForm extends React.Component {
         return
     }
 
-    try {
-      const response = await authController.signUp(credentials)
-
-      if (response.error) {
-        this.setState({invalidLogin: response.error})
-      } else {
-        browserHistory.push('/')
-      }
-
-    } catch (err) {
-      Log.error(`Guest|Login|onSubmit|err:${err}`)
-    }
+    authController.signUp(credentials)
+      .then(response => {
+        if (response.error) {
+          this.setState({invalidLogin: response.error})
+        } else {
+          browserHistory.push('/')
+        }
+      })
+      .catch(err => Log.error(`Guest|Login|onSubmit|err:${err}`))
   }
 
   validate(data) {

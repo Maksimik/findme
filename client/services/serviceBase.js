@@ -7,16 +7,16 @@ const credentials = {
   credentials: 'same-origin'
 }
 
+function checkStatus(response) {
+  if (response.status >= 200 && response.status < 300) {
 
-async function checkStatus(response) {
-  if (response.status >= 200 && response.status < 300) return await response
-
+    return response
+  }
   let error = new Error(response.statusText)
-  error.response = await response.json()
+  error.response = response.json()
 
-  return Promise.reject(error)
+  return error
 }
-
 
 function getJwtToken() {
   return appController.getJwt()
@@ -46,31 +46,28 @@ function getUrl(url) {
  */
 const serviceBase = {
 
-  get: async url => {
+  get: url => {
+
     credentials.headers = getHeaders(url)
 
-    let response = await fetch(getUrl(url), credentials)
-    response = await checkStatus(response)
-
-    return response.json()
+    return fetch(getUrl(url), credentials)
+      .then(response => checkStatus(response).json())
   },
 
-  postPutDelete: async (url, method, request) => {
+  postPutDelete: (url, method, request) => {
     const options = {
       headers: getHeaders(url),
       method: method,
       body: JSON.stringify(request)
     }
 
-    let response = await fetch(getUrl(url), Object.assign(options, credentials))
-    response = await checkStatus(response)
-
-    return response.json()
+    return fetch(getUrl(url), Object.assign(options, credentials))
+      .then(response => checkStatus(response).json())
   },
 
   post: (url, request) => serviceBase.postPutDelete(url, 'POST', request),
 
-  put: async (url, request) => serviceBase.postPutDelete(url, 'PUT', request),
+  put: (url, request) => serviceBase.postPutDelete(url, 'PUT', request),
 
   delete: (url, request) => serviceBase.postPutDelete(url, 'DELETE', request)
 }

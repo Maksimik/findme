@@ -1,7 +1,6 @@
 import React, {PropTypes} from 'react'
 import {Form, FormGroup, FormControl, ControlLabel, Col} from 'react-bootstrap'
 import Log from 'loglevel'
-import Editor from '../core/Editor'
 import InputHelp from '../core/InputHelp'
 import Checkbox from '../core/Checkbox'
 import Button from '../core/Button'
@@ -42,39 +41,43 @@ class ThingForm extends React.Component {
     this.onSave = this.onSave.bind(this)
   }
 
-  async onSave(event) {
+  onSave(event) {
     event.preventDefault()
-    try {
-      const data = {
-        title: this.state.title,
-        description: this.state.description,
-        status: this.state.status.value || 'calm',
-        visible: Number(this.state.isVisible),
-        userId: appController.user.id
-      }
 
-      if (!this.validate(data)) {
-        return
-      }
-
-      this.setState({loading: true})
-      const response = this.props.id ?
-        await thingService.update(this.props.id, data) :
-        await thingService.add(data)
-
-      if (!response.error) browserHistory.push('/')
-
-      this.setState({loading: false})
-      this.props.onSave()
-    } catch (error) {
-      Log.error(`Thing|onSave|error:${error}`)
-      this.setState({loading: false})
-
-      const errorResponse = (error.response || {}).error || {}
-      if (errorResponse.validation) {
-        this.setState({errors: errorResponse.validation})
-      }
+    const data = {
+      title: this.state.title,
+      description: this.state.description,
+      status: this.state.status.value || 'calm',
+      visible: Number(this.state.isVisible),
+      userId: appController.user.id
     }
+
+    if (!this.validate(data)) {
+
+      return
+    }
+
+    this.setState({loading: true})
+
+    const service = this.props.id ?
+      thingService.update(this.props.id, data) :
+      thingService.add(data)
+
+    service
+      .then(response => {
+        if (!response.error) browserHistory.push('/')
+        this.setState({loading: false})
+        this.props.onSave()
+      })
+      .catch(err => {
+        Log.error(`Thing|onSave|error:${err}`)
+        this.setState({loading: false})
+
+        const errorResponse = (err.response || {}).err || {}
+        if (errorResponse.validation) {
+          this.setState({errors: errorResponse.validation})
+        }
+      })
   }
 
   validate(data) {
@@ -92,8 +95,8 @@ class ThingForm extends React.Component {
     this.setState({status: status})
   }
 
-  onDescriptionChange(description) {
-    this.setState({description: description})
+  onDescriptionChange(event) {
+    this.setState({description: event.target.value})
   }
 
   onVisibleChange() {
@@ -124,14 +127,11 @@ class ThingForm extends React.Component {
           Description
         </Col>
         <Col sm={10}>
-          <Editor
-            value={this.state.description}
-            onContentChange={this.onDescriptionChange}
+          <FormControl
+            componentClass="textarea"
             placeholder="Description"
-          />
-          <InputHelp
-            show={Boolean(this.state.errors.description)}
-            message={(this.state.errors.description || [])[0]}
+            defaultValue={this.state.description}
+            onChange={this.onDescriptionChange}
           />
         </Col>
       </FormGroup>
@@ -177,11 +177,13 @@ class ThingForm extends React.Component {
 
 ThingForm.propTypes = {
   data: PropTypes.object,
-  onSave: PropTypes.func
+  onSave: PropTypes.func,
+  id: PropTypes.number
 }
 ThingForm.defaultProps = {
   data: {},
-  onSave: null
+  onSave: null,
+  id: null
 }
 
 export default ThingForm

@@ -13,7 +13,7 @@ export default {
    * @param {int} roleId
    * @return {Promise}
    */
-  insert: async (userId, roleId) => {
+  insert: (userId, roleId) => {
     const sql = `
       INSERT INTO user_roles
         (user_id, role_id)
@@ -25,6 +25,6 @@ export default {
       roleId: roleId
     }
 
-    return await dbBase.insert(sql, criteria)
+    return dbBase.insert(sql, criteria)
   }
 }

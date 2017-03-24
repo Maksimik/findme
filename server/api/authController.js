@@ -23,15 +23,12 @@ const authController = {
    * @param {Function} [next]
    * @returns {*}
    */
-  async signIn(req, res, next) {
+  signIn(req, res, next) {
     logger.info('api/authController|signIn', {login: req.body.login})
-    try {
-      const response = await authLogic.signIn(req.body.login, req.body.password)
 
-      return res.json(response)
-    } catch (e) {
-      return next(e)
-    }
+    return authLogic.signIn(req.body.login, req.body.password)
+      .then(response => res.json(response))
+      .catch(e => next(e))
   },
 
   /**
@@ -43,7 +40,7 @@ const authController = {
    * @param {Function} [next]
    * @returns {*}
    */
-  async signUp(req, res, next) {
+  signUp(req, res, next) {
     logger.info('api/authController|signUp')
 
     try {
@@ -54,14 +51,18 @@ const authController = {
         return res.status(responseError.error.code).json(responseError)
       }
 
-      const response = await authLogic.signUp(req.body)
+      return authLogic.signUp(req.body)
+        .then(response => res.json(response))
+        .catch(err => {
+          logger.error('api/authController|signUp', err)
 
-      return res.json(response)
+          return next(err)
+        })
 
-    } catch (e) {
-      logger.error('api/authController|signUp', e)
+    } catch (err) {
+      logger.error('api/authController|signUp', err)
 
-      return next(e)
+      return next(err)
     }
   }
 
