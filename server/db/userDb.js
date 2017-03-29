@@ -25,9 +25,9 @@ export default {
 
     return dbBase.findOne(sql, criteria, null)
       .then(dbData => {
-          if (dbData === null) return null
+        if (dbData === null) return null
 
-            return new User(dbData)
+          return new User(dbData)
       })
   },
 
@@ -57,7 +57,7 @@ export default {
    * @param {Object} user
    * @return {Promise}
    */
-  insert: async user => {
+  insert: user => {
     const sql = `
       INSERT INTO users
         (first_name, last_name, login, password, created_at)
@@ -72,6 +72,6 @@ export default {
       password: user.password
     }
 
-    return await dbBase.insert(sql, criteria)
+    return dbBase.insert(sql, criteria)
   }
 }

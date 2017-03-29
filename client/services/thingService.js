@@ -6,9 +6,10 @@ export default {
 
   /**
    * Gets all things.
+   * @param {number} userId
    * @returns {*}
    */
-  getAll: () => serviceBase.get('/things'),
+  getAll: (userId) => serviceBase.get(`/things/${userId}`),
 
   /**
    * Gets thing by id.
@@ -23,6 +24,13 @@ export default {
    * @returns {*}
    */
   getByHash: (hash) => serviceBase.get(`/preview/${hash}`),
+
+  /**
+   * Gets thing image by hash.
+   * @param {string} hash
+   * @returns {*}
+   */
+  // getImage: (hash) => serviceBase.get(`/thing/qr-image/${hash}`),
 
   /**
    * Add users thing.

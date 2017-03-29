@@ -46,7 +46,7 @@ class ThingEdit extends React.Component {
       .catch(err => {
         this.setState({loading: false})
         Log.error(`ThingEdit|getThing|error:${err}`)
-        })
+      })
   }
 
   onSave() {
@@ -55,7 +55,7 @@ class ThingEdit extends React.Component {
 
   render() {
     return <div>
-      <PageHeader title="Find me: Thing edit" />
+      <PageHeader title="Thing edit" />
       <PageActions>
         <LinkButton to="/" title="Things" />
       </PageActions>

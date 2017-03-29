@@ -17,7 +17,7 @@ class ThingAdd extends React.Component {
       <PageActions>
         <LinkButton to="/" title="Things" />
       </PageActions>
-      <ThingForm />
+      <ThingForm onSave={this.onSave}/>
     </div>
   }
 }

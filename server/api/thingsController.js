@@ -6,6 +6,7 @@ import logger from '../core/logger'
 import validate from '../../shared/validation/validate'
 import validationRules from '../../shared/validation/Thing'
 import {ValidationError, getResponseError} from '../errors'
+// import qr from 'qr-image'
 
 /**
  * things controller.
@@ -24,7 +25,7 @@ const thingsController = {
   getAll(req, res, next) {
     logger.info('api/thingsController|getAll')
 
-    thingLogic.getAll()
+    thingLogic.getAll(req.params.userId)
       .then(things => res.json({things: things}))
       .catch(err => {
         logger.error('api/thingsController|getAll', err)
@@ -53,6 +54,26 @@ const thingsController = {
           return next(err)
         })
   },
+  // /**
+  // * Load image thing by hash
+  // *
+  // * @param {object} req
+  // * @param {object} res
+  // * @param {function} res.json
+  // * @param {Function} [next]
+  // * @returns {*}
+  // */
+  // getImage(req, res, next) {
+  //   try{
+  //     logger.info('api/thingsController|getImage')
+
+  //     return res.json({image: qr.imageSync('text').toString('base64')});
+  //   }catch(err){
+  //     logger.error('api/thingsController|getImage', err)
+
+  //     return next(err)
+  //   }
+  // },
 
     /**
    * Load users thing by hash

@@ -6,12 +6,13 @@ import uuid from 'uuid-v4'
 const thingLogic = {
 
   /**
-   * Gets all things
+   * Gets all user things
+   * @param {int} userId
    * @returns {Array}
    */
-  getAll() {
+  getAll(userId) {
 
-    return thingDb.getAll()
+    return thingDb.getAll(userId)
   },
 
   /**
@@ -80,8 +81,10 @@ const thingLogic = {
    * @returns {Array}
    */
   delete(thingId) {
+    return userThingsDb.delete(thingId)
+      .then(() => thingDb.delete(thingId))
 
-    return thingDb.delete(thingId)
+    // return thingDb.delete(thingId)
   },
 
   /**

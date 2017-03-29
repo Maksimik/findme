@@ -34,6 +34,7 @@ export default {
 
     return userDb.getByLogin(params.login)
       .then(user => {
+
         if (user) return {error: 'A user with this login already exists'}
 
         const data = this.getPreparedToSave(params)
@@ -49,9 +50,10 @@ export default {
         return userDb.insert(data)
           .then(userId => {
             data.id = userId
-            userRolesDb.insert(userId, 2)
-              .then(id => ({
-                token: this.generateToken(id),
+
+            return userRolesDb.insert(userId, 2)
+              .then(() => ({
+                token: this.generateToken(userId),
                 user: (new User(data)).commonDetails
               }))
           })

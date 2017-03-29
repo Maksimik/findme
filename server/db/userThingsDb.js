@@ -26,5 +26,21 @@ export default {
     }
 
     return dbBase.insert(sql, criteria)
+  },
+
+  /**
+   * Delete thing.
+   * @param {int} thingId
+   * @return {Promise}
+   */
+  delete: thingId => {
+    const sql = `
+      DELETE FROM
+        user_things
+      WHERE thing_id = :thingId`
+
+    const criteria = {thingId}
+
+    return dbBase.delete(sql, criteria)
   }
 }

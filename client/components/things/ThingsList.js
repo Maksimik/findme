@@ -3,6 +3,7 @@ import {TableHeaderColumn} from 'react-bootstrap-table'
 import Log from 'loglevel'
 import DataTable from '../core/DataTable'
 import {thingService} from '../../services'
+import appController from '../../core/appController'
 import Button from '../core/Button'
 import LinkButton from '../core/LinkButton'
 import Loader from '../core/Loader'
@@ -21,6 +22,7 @@ class ThingsList extends React.Component {
       visibleRowsProcessing: []
     }
     this.activeFormatter = this.activeFormatter.bind(this)
+    this.urlFormatter = this.urlFormatter.bind(this)
   }
 
   componentDidMount() {
@@ -29,7 +31,7 @@ class ThingsList extends React.Component {
 
   getThings() {
     this.setState({loading: true})
-    thingService.getAll()
+    thingService.getAll(appController.user.id)
       .then(response => {
         this.setState({things: response.things, loading: false})
       })
@@ -48,6 +50,12 @@ class ThingsList extends React.Component {
           bsSize="xsmall"
           onClick={this.deleteThing.bind(this, row.id)}
         />
+      </div>
+  }
+
+  urlFormatter(value) {
+    return <div>
+        {`localhost:9000/thing/${value}`}
       </div>
   }
 
@@ -123,19 +131,28 @@ class ThingsList extends React.Component {
 
     return <div>
       <DataTable data={this.state.things}>
-        <TableHeaderColumn isKey dataField="id" width="50px" >
+        <TableHeaderColumn isKey dataField="id" width="30px" >
           Id
         </TableHeaderColumn>
         <TableHeaderColumn dataField="title" width="70px" >
           Title
         </TableHeaderColumn>
-        <TableHeaderColumn dataField="status" width="70px" >
+        <TableHeaderColumn dataField="hash"
+          width="90px"
+          dataFormat={this.urlFormatter} >
+          Url
+        </TableHeaderColumn>
+        <TableHeaderColumn dataField="status" width="40px" >
           Status
         </TableHeaderColumn>
-        <TableHeaderColumn dataField="visible" dataFormat={this.activeFormatter} dataAlign="center" width="75px">
+        <TableHeaderColumn
+          dataField="visible"
+          dataFormat={this.activeFormatter}
+          dataAlign="center"
+          width="40px" >
           Visible
         </TableHeaderColumn>
-        <TableHeaderColumn dataFormat={this.actionFormatter.bind(this)} dataAlign="center" width="100px">
+        <TableHeaderColumn dataFormat={this.actionFormatter.bind(this)} dataAlign="center" width="70px">
           Actions
         </TableHeaderColumn>
       </DataTable>

@@ -9,17 +9,22 @@ import {Thing} from '../models'
 export default {
 
   /**
-   * Gets all things.
+   * Gets all user things.
+   * @param {int} userId
    * @return {Promise}
    */
-  getAll: () => {
+  getAll: userId => {
     const sql = `
-      SELECT
-        id, hash, title, description, visible, status
-      FROM things
+      SELECT id, hash, title, description, visible, status
+      FROM user_things
+        LEFT JOIN things
+        ON user_things.thing_id = things.id
+      WHERE user_things.user_id = :userId
       ORDER BY title ASC`
 
-    return dbBase.findAll(sql)
+    const criteria = {userId}
+
+    return dbBase.findAll(sql, criteria, null)
       .then(dbData => dbData.map(x => new Thing(x)))
   },
 
@@ -61,7 +66,7 @@ export default {
 
     return dbBase.findOne(sql, criteria, null)
     .then(dbData => {
-        if (typeof dbData === 'undefined' || dbData === null) return null
+        if (dbData === null) return null
 
           return new Thing(dbData)
     })

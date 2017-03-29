@@ -7,7 +7,10 @@ const localDb = {
   setItem(key, value) {
     this.removeItem(key)
 
-    return localStorage.setItem(key, value)
+    return new Promise(resolve => {
+      const item = localStorage.setItem(key, value)
+      resolve(item)
+    })
   },
 
   getItem(key, parse) {
@@ -25,11 +28,14 @@ const localDb = {
   },
 
   removeItem(key) {
-    localStorage.removeItem(key)
+    return new Promise(resolve => {
+        localStorage.removeItem(key)
+        resolve()
+      })
   },
 
   setUser(user) {
-    this.setItem(this.userKey, JSON.stringify(user))
+    return this.setItem(this.userKey, JSON.stringify(user))
   },
 
   getUser() {
@@ -37,11 +43,11 @@ const localDb = {
   },
 
   deleteUser() {
-    this.removeItem(this.userKey)
+    return this.removeItem(this.userKey)
   },
 
   setJwt(jwt) {
-    this.setItem(this.jwtKey, jwt)
+    return this.setItem(this.jwtKey, jwt)
   },
 
   getJwt() {
@@ -49,7 +55,7 @@ const localDb = {
   },
 
   deleteJwt() {
-    this.removeItem(this.jwtKey)
+    return this.removeItem(this.jwtKey)
   }
 }
 

@@ -64,11 +64,10 @@ class Db {
 
         return rows
       })
-      // .then(rows => rows.length > 0 ? rows[0][0] : defaultResult)
       .then(rows => {
-        if (rows.length > 0) return rows[0][0]
+        if (rows.length > 0 && typeof rows[0][0] !== 'undefined') return rows[0][0]
 
-          return defaultResult
+        return defaultResult
       })
       .catch(err => {
         logger.log('error', 'db|findOne', {sql, criterial, err})

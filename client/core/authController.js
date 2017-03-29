@@ -9,38 +9,55 @@ import localDb from './localDb'
  */
 export default {
 
-  async signIn(credentials) {
-    const response = await authService.signIn(credentials)
-    if (!response.token || !response.user) throw Error('Something went wrong. Please try again.')
+  signIn(credentials) {
 
-    appController.setJwt(response.token)
-    appController.setUser(response.user)
+    return authService.signIn(credentials)
+      .then(response => {
+        if (!response.token || !response.user) throw Error('Something went wrong. Please try again.')
 
-    await localDb.setJwt(response.token)
-    await localDb.setUser(response.user)
+        appController.setJwt(response.token)
+        appController.setUser(response.user)
 
-    return response
+        return new Promise(resolve => {
+           localDb.setJwt(response.token)
+            .then(() =>
+              localDb.setUser(response.user)
+                .then(() => resolve(response))
+            )
+        })
+      })
   },
 
-  async signOut() {
-    await localDb.deleteJwt()
-    await localDb.deleteUser()
-    appController.removeJwt()
-    appController.removeUser()
+  signOut() {
+
+    return new Promise(resolve => {
+      localDb.deleteJwt()
+      .then(() =>
+        localDb.deleteUser()
+          .then(() => {
+            appController.removeJwt()
+            appController.removeUser()
+            resolve()
+          })
+        )
+    })
   },
 
-  async signUp(credentials) {
-    const response = await authService.signUp(credentials)
+  signUp(credentials) {
 
-    if (response.token && response.user) {
+    return authService.signUp(credentials)
+      .then(response => {
+        if (!response.token || !response.user) throw Error('Something went wrong. Please try again.')
 
-      appController.setJwt(response.token)
-      appController.setUser(response.user)
+        appController.setJwt(response.token)
+        appController.setUser(response.user)
 
-      await localDb.setJwt(response.token)
-      await localDb.setUser(response.user)
-    }
-
-    return response
+        return new Promise(resolve => {
+          localDb.setJwt(response.token)
+            .then(() =>
+              localDb.setUser(response.user)
+                .then(() => resolve(response)))
+          })
+      })
   }
 }

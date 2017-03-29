@@ -42,8 +42,9 @@ export default {
       return
     }
 
-    try {
-      jwt.verify(token, JWTConfig.jwtSecret, async (err, decoded) => {
+     try {
+
+      jwt.verify(token, JWTConfig.jwtSecret, (err, decoded) => {
         if (err) {
           setResponseError(res, new AuthenticationError('Token not found', err))
 
@@ -51,17 +52,18 @@ export default {
         }
 
         req.userId = decoded.userId
+        userDb.getById(req.userId)
+          .then(user => {
+            if (!user) {
+              setResponseError(res, new AuthenticationError('User not found'))
 
-        const user = await userDb.getById(req.userId)
-        if (!user) {
-          setResponseError(res, new AuthenticationError('User not found'))
+              return
+            }
 
-          return
-        }
+            req.user = user
 
-        req.user = user
-
-        next()
+            next()
+          })
       })
     } catch (err) {
       setResponseError(res, new ServerError(err.message || 'Unknown error'))

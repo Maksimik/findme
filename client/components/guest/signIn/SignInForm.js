@@ -31,7 +31,7 @@ class SignInForm extends React.Component {
     })
   }
 
-  async onSubmit(e) {
+  onSubmit(e) {
     e.preventDefault()
 
     const credentials = {

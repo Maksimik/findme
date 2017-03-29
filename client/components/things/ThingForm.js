@@ -41,6 +41,18 @@ class ThingForm extends React.Component {
     this.onSave = this.onSave.bind(this)
   }
 
+  // componentDidMount(){
+  //   console.log("componentDidMount")
+
+  //   thingService.getImage('hash')
+  //     .then((response) => {
+  //       this.setState({image: response.image})
+  //     })
+  //     .catch(err => {
+  //       Log.error(`ThingForm|getImage|error:${err}`)
+  //     })
+  // }
+
   onSave(event) {
     event.preventDefault()
 
