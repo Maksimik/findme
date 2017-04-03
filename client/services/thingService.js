@@ -18,19 +18,12 @@ export default {
    */
   getById: (id) => serviceBase.get(`/thing/${id}`),
 
-   /**
+  /**
    * Gets thing by hash.
    * @param {string} hash
    * @returns {*}
    */
-  getByHash: (hash) => serviceBase.get(`/preview/${hash}`),
-
-  /**
-   * Gets thing image by hash.
-   * @param {string} hash
-   * @returns {*}
-   */
-  // getImage: (hash) => serviceBase.get(`/thing/qr-image/${hash}`),
+  getByHash: (hash) => serviceBase.get(`/preview/thing/${hash}`),
 
   /**
    * Add users thing.

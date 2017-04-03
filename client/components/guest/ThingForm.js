@@ -2,7 +2,7 @@ import React, {PropTypes} from 'react'
 import {Form, FormGroup, ControlLabel, Col} from 'react-bootstrap'
 
 
-class Thing extends React.Component {
+class ThingForm extends React.Component {
 
   constructor(props) {
     super(props)
@@ -36,11 +36,11 @@ class Thing extends React.Component {
   }
 }
 
-Thing.propTypes = {
+ThingForm.propTypes = {
   thing: PropTypes.object
 }
-Thing.defaultProps = {
+ThingForm.defaultProps = {
   thing: {}
 }
 
-export default Thing
+export default ThingForm

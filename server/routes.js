@@ -6,6 +6,7 @@ import logger from './core/logger'
 import api from './api'
 import authController from './api/authController'
 import thingsController from './api/thingsController'
+import usersController from './api/usersController'
 
 /**
  * Defines routes.
@@ -20,7 +21,8 @@ export default (app, auth) => {
 
   app.use('/api/signIn', authController.signIn)
   app.use('/api/signUp', authController.signUp)
-  app.use('/api/preview/:hash', thingsController.getByHash)
+  app.use('/api/preview/thing/:hash', thingsController.getByHash)
+  app.use('/api/preview/userProfile/:id', usersController.getUserProfileById)
 
   app.use('/api', auth.authenticate, api)
 

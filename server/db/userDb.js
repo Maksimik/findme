@@ -17,7 +17,7 @@ export default {
 
     const sql = `
       SELECT
-        id, first_name, last_name, login, password
+        id, login, password
       FROM users
       WHERE login = :login`
 
@@ -39,7 +39,7 @@ export default {
   getById: id => {
     const sql = `
       SELECT
-        id, first_name, last_name, login, password
+        id, login, password
       FROM users
       WHERE id = :id`
     const criteria = {id}
@@ -60,14 +60,12 @@ export default {
   insert: user => {
     const sql = `
       INSERT INTO users
-        (first_name, last_name, login, password, created_at)
+        (login, password, created_at)
       VALUES
-        (:firstName, :lastName, :login, :password, NOW())
+        (:login, :password, NOW())
       `
 
     const criteria = {
-      firstName: user.firstName,
-      lastName: user.lastName,
       login: user.login,
       password: user.password
     }

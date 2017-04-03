@@ -29,6 +29,25 @@ export default {
   },
 
   /**
+   * Get userId by thingId.
+   * @param {int} thingId
+   * @return {Promise}
+   */
+  getUserId: (thingId) => {
+    const sql = `
+      SELECT
+        user_id
+      FROM user_things
+      WHERE thing_id = :thingId`
+
+    const criteria = {
+      thingId: thingId
+    }
+
+    return dbBase.findOne(sql, criteria)
+  },
+
+  /**
    * Delete thing.
    * @param {int} thingId
    * @return {Promise}

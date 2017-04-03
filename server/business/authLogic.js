@@ -54,7 +54,7 @@ export default {
             return userRolesDb.insert(userId, 2)
               .then(() => ({
                 token: this.generateToken(userId),
-                user: (new User(data)).commonDetails
+                user: new User(data)
               }))
           })
 
@@ -114,7 +114,7 @@ export default {
 
     return {
       token: this.generateToken(user.id),
-      user: user.commonDetails
+      user: user
     }
   }
 }

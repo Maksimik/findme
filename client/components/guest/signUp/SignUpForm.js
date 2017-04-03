@@ -13,31 +13,15 @@ class SignUpForm extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      firstName: '',
-      lastName: '',
       login: '',
       password: '',
       errors: {},
       invalidLogin: ''
     }
 
-    this.onFirstNameChange = this.onFirstNameChange.bind(this)
-    this.onLastNameChange = this.onLastNameChange.bind(this)
     this.onLoginChange = this.onLoginChange.bind(this)
     this.onPasswordChange = this.onPasswordChange.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
-  }
-
-  onFirstNameChange(event) {
-    this.setState({
-      firstName: event.target.value
-    })
-  }
-
-  onLastNameChange(event) {
-    this.setState({
-      lastName: event.target.value
-    })
   }
 
   onLoginChange(event) {
@@ -57,8 +41,6 @@ class SignUpForm extends React.Component {
     e.preventDefault()
 
     const credentials = {
-      firstName: this.state.firstName,
-      lastName: this.state.lastName,
       login: this.state.login,
       password: this.state.password
     }
@@ -72,7 +54,8 @@ class SignUpForm extends React.Component {
         if (response.error) {
           this.setState({invalidLogin: response.error})
         } else {
-          browserHistory.push('/')
+          browserHistory.push('/settings')
+
         }
       })
       .catch(err => Log.error(`Guest|Login|onSubmit|err:${err}`))
@@ -88,40 +71,6 @@ class SignUpForm extends React.Component {
   render() {
     return <div>
       <Form onSubmit={this.onSubmit} horizontal>
-        <FormGroup>
-          <Col componentClass={ControlLabel} sm={3}>
-            First name
-          </Col>
-          <Col sm={6}>
-            <FormControl
-              value={this.state.firstName}
-              onChange={this.onFirstNameChange}
-              placeholder="First name"
-            />
-            <InputHelp
-              show={Boolean(this.state.errors.firstName)}
-              message={(this.state.errors.firstName || [])[0]}
-            />
-          </Col>
-        </FormGroup>
-
-        <FormGroup>
-          <Col componentClass={ControlLabel} sm={3}>
-            Last name
-          </Col>
-          <Col sm={6}>
-            <FormControl
-              value={this.state.lastName}
-              onChange={this.onLastNameChange}
-              placeholder="Last name"
-            />
-            <InputHelp
-              show={Boolean(this.state.errors.lastName)}
-              message={(this.state.errors.lastName || [])[0]}
-            />
-          </Col>
-        </FormGroup>
-
         <FormGroup>
           <Col componentClass={ControlLabel} sm={3}>
             Login

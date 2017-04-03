@@ -41,7 +41,7 @@ class SignInForm extends React.Component {
 
     authController.signIn(credentials)
       .then(() => browserHistory.push('/'))
-      .catch(err => Log.error(`Guest|SignIn|onSubmit|err:${err}`))
+      .catch(err => Log.error(`Guest|SignIn|onSubmit|${err}`))
   }
 
   render() {

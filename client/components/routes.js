@@ -7,6 +7,7 @@ import authController from '../core/authController'
 import Things from './things/Things'
 import ThingAdd from './things/ThingAdd'
 import ThingEdit from './things/ThingEdit'
+import Settings from './settings/Settings'
 import Thing from './guest/Thing'
 import SignIn from './guest/signIn/SignIn'
 import SignUp from './guest/signUp/SignUp'
@@ -52,6 +53,7 @@ const App = <Route>
     <Route path="/things/:id/edit" component={ThingEdit}/>
 
   </Route>
+    <Route path="/settings" component={Settings}/>
 
     <Route path="/signIn" component={SignIn} onEnter={onGuestEnter} />
     <Route path="/signUp" component={SignUp} onEnter={onGuestEnter} />

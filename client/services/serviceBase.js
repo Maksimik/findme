@@ -8,14 +8,16 @@ const credentials = {
 }
 
 function checkStatus(response) {
-  if (response.status >= 200 && response.status < 300) {
 
-    return response
-  }
-  let error = new Error(response.statusText)
-  error.response = response.json()
+  return response.json()
+    .then(res => {
+      if (response.status >= 200 && response.status < 300) {
 
-  return error
+        return res
+      }
+
+      throw Error(res.error.message)
+    })
 }
 
 function getJwtToken() {
@@ -51,7 +53,7 @@ const serviceBase = {
     credentials.headers = getHeaders(url)
 
     return fetch(getUrl(url), credentials)
-      .then(response => checkStatus(response).json())
+      .then(response => checkStatus(response))
   },
 
   postPutDelete: (url, method, request) => {
@@ -61,8 +63,8 @@ const serviceBase = {
       body: JSON.stringify(request)
     }
 
-    return fetch(getUrl(url), Object.assign(options, credentials))
-      .then(response => checkStatus(response).json())
+    return fetch(getUrl(url), Object.assign(options))
+      .then(response => checkStatus(response))
   },
 
   post: (url, request) => serviceBase.postPutDelete(url, 'POST', request),

@@ -7,10 +7,12 @@ class HeaderActions extends React.Component {
 
   render() {
     return <div className="pull-right">
+      <Link to="/settings">
+        <Button title="Settings" />
+      </Link>
       <Link to="/signOut">
         <Button title="Sign out" />
       </Link>
-
     </div>
   }
 }

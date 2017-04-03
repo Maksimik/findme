@@ -1,10 +1,11 @@
 import React, {PropTypes} from 'react'
 import Layout from '../core/Layout'
 import PageHeader from '../core/PageHeader'
-import {thingService} from '../../services'
+import {thingService, userService} from '../../services'
 import Loader from '../core/Loader'
 import LoaderModal from '../core/LoaderModal'
 import ThingForm from './ThingForm'
+import ContactForm from './ContactForm'
 import Log from 'loglevel'
 
 
@@ -15,6 +16,7 @@ class Thing extends React.Component {
 
     this.state = {
       thing: {},
+      userProfile: [],
       loading: true,
       loadingModal: false
     }
@@ -41,22 +43,37 @@ class Thing extends React.Component {
             visible: thingResponse.visible
           }
           this.setState({thing})
+
+          userService.getUserProfileById(thing.id)
+            .then(res => {
+              this.setState({userProfile: res})
+              this.setState({loading: false})
+            })
+            .catch(err => {
+              this.setState({loading: false})
+              Log.error(`Thing|getThing|error:${err}`)
+            })
         }
-        this.setState({loading: false})
       })
       .catch(err => {
         this.setState({loading: false})
-        Log.error(`ThingEdit|getThing|error:${err}`)
+        Log.error(`Thing|getThing|error:${err}`)
       })
   }
 
   render() {
-
     return <Layout>
       <PageHeader title="Thing" />
       {this.state.loading ?
           <Loader show={this.state.loading} /> :
-          <ThingForm thing={this.state.thing}/>
+          <div>
+            <ThingForm thing={this.state.thing}/>
+            <PageHeader title="Contact Information" />
+            {this.state.userProfile.length > 0 ?
+              <ContactForm userProfile={this.state.userProfile} /> :
+              <div>Not found</div>
+            }
+          </div>
       }
       <LoaderModal show={this.state.loadingModal} />
     </Layout>
