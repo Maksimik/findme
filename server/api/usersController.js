@@ -62,14 +62,6 @@ const usersController = {
   update(req, res, next) {
     logger.info('api/usersController|update')
 
-
-    // const errors = validate(req.body, validationRules)
-    // if (errors) {
-    //   const responseError = getResponseError(new ValidationError('Bad request', errors))
-
-    //   return res.status(responseError.error.code).json(responseError)
-    // }
-
     return userLogic.update(req.params.id, req.body)
       .then(data => res.json({data}))
       .catch(err => {
